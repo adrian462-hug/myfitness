@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08090c">
+<title>MyFitness</title>
+<style>
+:root{--bg:#08090c;--panel:#151820;--panel2:#1d222c;--line:#303744;--text:#f4f5f7;--muted:#9aa3b2;--accent:#a3e635;--blue:#60a5fa;--danger:#fb7185}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:94px}
+header{padding:25px 20px 21px;background:linear-gradient(145deg,#171c25,#08090c);border-bottom:1px solid var(--line)}
+.brand{display:flex;justify-content:space-between;align-items:center}.brand h1{margin:0;font-size:30px;letter-spacing:-1px}.brand span{color:var(--accent);font-size:27px}header p{margin:6px 0 0;color:var(--muted);letter-spacing:2px;font-size:11px}
+main{max-width:680px;margin:auto;padding:17px 14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+h2{font-size:19px;margin:0 0 14px}h3{font-size:16px;margin:0 0 7px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:var(--panel2);border-radius:14px;padding:13px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:7px}
+label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}
+input,select,textarea{width:100%;background:#0c0f14;border:1px solid var(--line);border-radius:11px;padding:12px;color:var(--text);font-size:16px}
+button{border:0;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.primary{background:var(--accent);color:#10140a;width:100%;margin-top:13px}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:transparent;color:var(--danger);padding:7px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(12,14,19,.98);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 2px calc(8px + env(safe-area-inset-bottom));z-index:5}
+nav button{background:transparent;color:var(--muted);padding:7px 4px;min-width:0;font-size:10px;line-height:1.4}nav button.active{color:var(--accent)}
+.entry{padding:12px 0;border-top:1px solid var(--line)}.entry:first-of-type{border-top:0}.entrytop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.muted{color:var(--muted);font-size:13px}.empty{color:var(--muted);text-align:center;padding:20px 5px}.hint{color:var(--muted);font-size:12px;line-height:1.5}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.exercise-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tag{background:#252c37;color:#dce2eb;border-radius:8px;padding:5px 8px;font-size:12px}.tag.green{background:#29351b;color:var(--accent)}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.month-title{font-weight:800;font-size:17px}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.weekday{text-align:center;color:var(--muted);font-size:11px;padding:5px 0}.day{background:#0c0f14;border:1px solid var(--line);border-radius:9px;min-height:49px;padding:5px 2px;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px}.day.blank{visibility:hidden}.day.today{border-color:var(--accent)}.day.selected{background:#27321b;border-color:var(--accent)}.dots{display:flex;gap:3px}.dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}.dot.run{background:var(--blue)}
+.checkrow{display:flex;align-items:center;gap:9px;background:#0c0f14;border:1px solid var(--line);padding:12px;border-radius:12px;margin-top:8px}.checkrow input{width:20px;height:20px;accent-color:var(--accent)}
+.timer{text-align:center}.time-display{font-variant-numeric:tabular-nums;font-size:54px;font-weight:800;letter-spacing:1px;margin:8px 0 14px;color:var(--accent)}.timer-controls{display:grid;grid-template-columns:1fr 1fr;gap:9px}.timer-controls button{font-size:15px}.timer-presets{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:12px}.timer-presets button{padding:8px 11px}
+</style>
+</head>
+<body>
+<header><div class="brand"><h1>MyFitness</h1><span>✦</span></div><p>DEIN TRAINING. DEIN FORTSCHRITT.</p></header>
+<main>
+<section id="home">
+ <div class="card"><h2>Dein Überblick</h2><div class="stats"><div class="stat"><small>Trainingstage</small><strong id="totalDays">0</strong></div><div class="stat"><small>Trainings diesen Monat</small><strong id="monthTotal">0</strong></div></div></div>
+ <div class="card"><h2>Deine Übungen</h2><div id="homeExercises" class="empty">Noch keine Übungen gespeichert.</div></div>
+ <div class="card"><h2>Letzte Trainingstage</h2><div id="recent" class="empty">Noch keine Trainings markiert.</div></div>
+</section>
+<section id="calendar" class="hidden">
+ <div class="card"><h2>Trainingskalender</h2><div class="calendar-head"><button class="secondary" onclick="changeMonth(-1)">‹</button><div class="month-title" id="monthLabel"></div><button class="secondary" onclick="changeMonth(1)">›</button></div><div class="cal-grid" id="calendarGrid"></div><p class="hint">Wähle einen Tag. Grün = Krafttraining, Blau = Joggen.</p></div>
+ <div class="card"><h2 id="selectedTitle">Training am gewählten Tag</h2>
+  <label class="checkrow"><input type="checkbox" id="strengthCheck" onchange="setActivity('strength',this.checked)"> Krafttraining gemacht</label>
+  <label class="checkrow"><input type="checkbox" id="runCheck" onchange="setActivity('run',this.checked)"> Joggen gewesen</label>
+  <label for="dayNote">Notiz (optional)</label><input id="dayNote" placeholder="z. B. 5 km oder Beine">
+  <button class="primary" onclick="saveDayNote()">Tag speichern</button>
+ </div>
+</section>
+<section id="exercises" class="hidden">
+ <div class="card"><h2 id="formTitle">Übung hinzufügen</h2>
+  <input id="editId" type="hidden">
+  <label for="exerciseName">Name der Übung</label><input id="exerciseName" placeholder="z. B. Kniebeugen">
+  <label for="exerciseGroup">Bereich</label><select id="exerciseGroup"><option>Krafttraining</option><option>Beine</option><option>Oberkörper</option><option>Bauch</option><option>Cardio</option><option>Dehnen / Mobility</option><option>Sonstiges</option></select>
+  <div class="grid"><div><label for="exerciseSets">Sätze</label><input id="exerciseSets" type="number" min="0" inputmode="numeric" placeholder="3"></div><div><label for="exerciseReps">Wiederholungen</label><input id="exerciseReps" type="number" min="0" inputmode="numeric" placeholder="12"></div></div>
+  <div class="grid"><div><label for="exerciseWeight">Gewicht (kg)</label><input id="exerciseWeight" type="number" min="0" step="0.5" inputmode="decimal" placeholder="40"></div><div><label for="exerciseTime">Zeit (Sekunden)</label><input id="exerciseTime" type="number" min="0" inputmode="numeric" placeholder="45"></div></div>
+  <button class="primary" onclick="saveExercise()">Übung speichern</button><button id="cancelEdit" class="secondary hidden" style="width:100%;margin-top:8px" onclick="clearExerciseForm()">Abbrechen</button>
+  <p class="hint">Deine Übungen und Werte bleiben dauerhaft in deiner Übungsliste gespeichert. Sie ändern sich nur, wenn du sie selbst bearbeitest oder löschst.</p>
+ </div>
+ <div class="card"><h2>Meine gespeicherten Übungen</h2><div id="exerciseList" class="empty">Noch keine Übungen gespeichert.</div></div>
+</section>
+<section id="session" class="hidden">
+ <div class="card">
+  <h2>Übungsstart</h2>
+  <p class="hint">Wähle eine gespeicherte Übung. MyFitness zählt 3–2–1, startet deine Übungszeit und danach automatisch die Satzpause.</p>
+  <label for="sessionExercise">Übung auswählen</label><select id="sessionExercise"></select>
+  <div class="grid"><div><label for="sessionSets">Sätze für dieses Training</label><input id="sessionSets" type="number" min="1" max="30" value="3" inputmode="numeric"></div><div><label for="restSeconds">Pause zwischen Sätzen (Sek.)</label><input id="restSeconds" type="number" min="0" max="600" value="30" inputmode="numeric"></div></div>
+  <div class="card timer" style="margin:14px 0 0;background:#0c0f14">
+   <div class="muted" id="sessionPhase">Bereit</div><div class="time-display" id="sessionDisplay">00:03</div>
+   <div class="muted" id="sessionDetail">Wähle eine Übung und tippe auf Start.</div>
+   <button class="primary" style="width:100%" onclick="startSession()">Übung starten</button>
+   <div class="grid" style="margin-top:9px"><button class="secondary" onclick="pauseSession()">Pause</button><button class="secondary" onclick="resetSession()">Zurücksetzen</button></div>
+  </div>
+  <p class="hint">Ablauf: 3–2–1 Startsignal → Übungszeit → Pause zwischen den Sätzen → 3–2–1 → nächster Satz. Nach dem letzten Satz ist die Übung abgeschlossen.</p>
+ </div>
+</section>
+<section id="timer" class="hidden">
+ <div class="card timer"><h2>Countdown-Timer</h2><div class="time-display" id="timeDisplay">00:30</div>
+  <div class="grid"><div><label for="minutes">Minuten</label><input id="minutes" type="number" min="0" max="180" value="0" inputmode="numeric"></div><div><label for="seconds">Sekunden</label><input id="seconds" type="number" min="0" max="59" value="30" inputmode="numeric"></div></div>
+  <div class="timer-controls"><button class="primary" onclick="startTimer()">Start</button><button class="secondary" onclick="pauseTimer()">Pause</button></div><button class="secondary" style="width:100%;margin-top:9px" onclick="resetTimer()">Zurücksetzen</button>
+  <div class="timer-presets"><button class="secondary" onclick="preset(30)">30 Sek.</button><button class="secondary" onclick="preset(60)">1 Min.</button><button class="secondary" onclick="preset(300)">5 Min.</button><button class="secondary" onclick="preset(600)">10 Min.</button></div>
+  <p class="hint">Der Signalton funktioniert am zuverlässigsten, wenn MyFitness in Safari geöffnet und im Vordergrund bleibt.</p>
+ </div>
+</section>
+<section id="history" class="hidden"><div class="card"><h2>Trainingsverlauf</h2><div id="allEntries" class="empty">Noch keine Trainings markiert.</div></div></section>
+<section id="more" class="hidden"><div class="card"><h2>Meine Daten</h2><p class="hint">Übungsliste und Kalender werden lokal in diesem Browser auf diesem iPhone gespeichert. Beim Löschen der Safari-Websitedaten können sie verloren gehen.</p><button class="secondary" style="width:100%" onclick="exportData()">Daten sichern (JSON)</button></div></section>
+</main>
+<nav>
+ <button class="active" data-tab="home" onclick="showTab('home',this)">⌂<br>Start</button>
+ <button data-tab="calendar" onclick="showTab('calendar',this)">▦<br>Kalender</button>
+ <button data-tab="exercises" onclick="showTab('exercises',this)">＋<br>Übungen</button>
+ <button data-tab="session" onclick="showTab('session',this)">▶<br>Start</button>
+ <button data-tab="timer" onclick="showTab('timer',this)">◷<br>Timer</button>
+ <button data-tab="more" onclick="showTab('more',this)">⚙<br>Mehr</button>
+</nav>
+<script>
+const EXKEY='myfitness_exercises_v3',DAYKEY='myfitness_training_calendar_v2';
+let exercises=[],records={};try{exercises=JSON.parse(localStorage.getItem(EXKEY)||'[]')}catch(e){}try{records=JSON.parse(localStorage.getItem(DAYKEY)||'{}')}catch(e){}
+let selectedDate=new Date().toISOString().slice(0,10),viewDate=new Date(),remaining=30,interval=null,sessionInterval=null,sessionRemaining=3,sessionPhase='idle',sessionSet=1,sessionTotal=3,sessionExercise=null;
+function saveAll(){localStorage.setItem(EXKEY,JSON.stringify(exercises));localStorage.setItem(DAYKEY,JSON.stringify(records));render()}
+function showTab(id,btn){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function saveExercise(){
+ const name=document.getElementById('exerciseName').value.trim();if(!name){alert('Bitte gib der Übung einen Namen.');return}
+ const id=document.getElementById('editId').value;
+ const item={id:id||String(Date.now()),name,group:document.getElementById('exerciseGroup').value,sets:document.getElementById('exerciseSets').value,reps:document.getElementById('exerciseReps').value,weight:document.getElementById('exerciseWeight').value,time:document.getElementById('exerciseTime').value};
+ if(id){exercises=exercises.map(x=>x.id===id?item:x)}else{exercises.push(item)}
+ clearExerciseForm();saveAll();
+}
+function editExercise(id){const x=exercises.find(e=>e.id===id);if(!x)return;document.getElementById('editId').value=x.id;document.getElementById('exerciseName').value=x.name;document.getElementById('exerciseGroup').value=x.group;document.getElementById('exerciseSets').value=x.sets;document.getElementById('exerciseReps').value=x.reps;document.getElementById('exerciseWeight').value=x.weight;document.getElementById('exerciseTime').value=x.time;document.getElementById('formTitle').textContent='Übung bearbeiten';document.getElementById('cancelEdit').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function deleteExercise(id){if(confirm('Diese Übung wirklich dauerhaft aus deiner Liste löschen?')){exercises=exercises.filter(x=>x.id!==id);saveAll()}}
+function clearExerciseForm(){['editId','exerciseName','exerciseSets','exerciseReps','exerciseWeight','exerciseTime'].forEach(id=>document.getElementById(id).value='');document.getElementById('exerciseGroup').value='Krafttraining';document.getElementById('formTitle').textContent='Übung hinzufügen';document.getElementById('cancelEdit').classList.add('hidden')}
+function exerciseHTML(x){let bits=[];if(x.sets)bits.push(x.sets+' Sätze');if(x.reps)bits.push(x.reps+' Wdh.');if(x.weight)bits.push(x.weight+' kg');if(x.time)bits.push(x.time+' Sek.');return `<div class="entry"><div class="entrytop"><div><strong>${esc(x.name)}</strong><div class="muted">${esc(x.group)}</div><div class="exercise-meta">${bits.map(b=>`<span class="tag green">${esc(b)}</span>`).join('')||'<span class="muted">Noch keine Werte</span>'}</div></div><div style="display:flex;gap:4px"><button class="secondary" onclick="editExercise('${x.id}')">Bearbeiten</button><button class="danger" onclick="deleteExercise('${x.id}')">Löschen</button></div></div></div>`}
+function changeMonth(n){viewDate.setMonth(viewDate.getMonth()+n);renderCalendar()}
+function setActivity(type,checked){let r=records[selectedDate]||{strength:false,run:false,note:''};r[type]=checked;if(!r.strength&&!r.run&&!r.note)delete records[selectedDate];else records[selectedDate]=r;saveAll()}
+function saveDayNote(){let r=records[selectedDate]||{strength:false,run:false,note:''};r.note=document.getElementById('dayNote').value.trim();if(!r.strength&&!r.run&&!r.note)delete records[selectedDate];else records[selectedDate]=r;saveAll()}
+function selectDay(day){selectedDate=day;renderCalendar()}
+function renderCalendar(){const y=viewDate.getFullYear(),m=viewDate.getMonth(),first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),offset=(first.getDay()+6)%7;document.getElementById('monthLabel').textContent=new Intl.DateTimeFormat('de-CH',{month:'long',year:'numeric'}).format(viewDate);const grid=document.getElementById('calendarGrid');grid.innerHTML=['Mo','Di','Mi','Do','Fr','Sa','So'].map(d=>`<div class="weekday">${d}</div>`).join('');for(let i=0;i<offset;i++)grid.insertAdjacentHTML('beforeend','<div class="day blank"></div>');for(let d=1;d<=days;d++){let key=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,r=records[key]||{},today=key===new Date().toISOString().slice(0,10);grid.insertAdjacentHTML('beforeend',`<button class="day ${key===selectedDate?'selected':''} ${today?'today':''}" onclick="selectDay('${key}')">${d}<span class="dots">${r.strength?'<i class="dot"></i>':''}${r.run?'<i class="dot run"></i>':''}</span></button>`)}const r=records[selectedDate]||{};document.getElementById('selectedTitle').textContent='Training am '+new Date(selectedDate+'T12:00:00').toLocaleDateString('de-CH');document.getElementById('strengthCheck').checked=!!r.strength;document.getElementById('runCheck').checked=!!r.run;document.getElementById('dayNote').value=r.note||''}
+function renderHistory(){const rows=Object.keys(records).sort().reverse().filter(k=>records[k].strength||records[k].run||records[k].note);document.getElementById('allEntries').innerHTML=rows.length?rows.map(k=>{let r=records[k],tags=[r.strength?'Krafttraining':'',r.run?'Joggen':''].filter(Boolean).join(' · ');return `<div class="entry"><strong>${new Date(k+'T12:00:00').toLocaleDateString('de-CH')}</strong><div class="muted">${tags||'Notiz'} ${r.note?' · '+esc(r.note):''}</div></div>`}).join(''):'<div class="empty">Noch keine Trainings markiert.</div>'}
+function render(){const keys=Object.keys(records),month=new Date().toISOString().slice(0,7);document.getElementById('totalDays').textContent=keys.filter(k=>records[k].strength||records[k].run).length;document.getElementById('monthTotal').textContent=keys.filter(k=>k.startsWith(month)&&(records[k].strength||records[k].run)).length;document.getElementById('exerciseList').innerHTML=exercises.length?exercises.map(exerciseHTML).join(''):'<div class="empty">Noch keine Übungen gespeichert.</div>';document.getElementById('homeExercises').innerHTML=exercises.length?exercises.slice(0,4).map(x=>`<div class="entry"><strong>${esc(x.name)}</strong><div class="muted">${[x.sets?x.sets+' Sätze':'',x.reps?x.reps+' Wdh.':'',x.weight?x.weight+' kg':'',x.time?x.time+' Sek.':''].filter(Boolean).join(' · ')}</div></div>`).join(''):'<div class="empty">Noch keine Übungen gespeichert.</div>';const recent=keys.sort().reverse().filter(k=>records[k].strength||records[k].run).slice(0,4);document.getElementById('recent').innerHTML=recent.length?recent.map(k=>`<div class="entry"><strong>${new Date(k+'T12:00:00').toLocaleDateString('de-CH')}</strong><div class="muted">${[records[k].strength?'Krafttraining':'',records[k].run?'Joggen':''].filter(Boolean).join(' · ')}</div></div>`).join(''):'<div class="empty">Noch keine Trainings markiert.</div>';renderCalendar();renderHistory();refreshSessionChoices()}
+
+function refreshSessionChoices(){
+ const sel=document.getElementById('sessionExercise'),old=sel.value;
+ sel.innerHTML=exercises.length?exercises.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} · ${esc(x.time||0)} Sek.</option>`).join(''):'<option value="">Noch keine Übungen gespeichert</option>';
+ if(exercises.some(x=>x.id===old))sel.value=old;
+}
+function sessionBeep(freq=880){
+ try{const ctx=window.audioCtx||new(window.AudioContext||window.webkitAudioContext)();window.audioCtx=ctx;if(ctx.state==='suspended')ctx.resume();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=freq;g.gain.setValueAtTime(.001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.28,ctx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.22)}catch(e){}
+}
+function showSessionTime(){document.getElementById('sessionDisplay').textContent=fmt(sessionRemaining)}
+function pauseSession(){if(sessionInterval){window.resumePhase=sessionPhase;clearInterval(sessionInterval);sessionInterval=null;sessionPhase='paused'}document.getElementById('sessionPhase').textContent='Pausiert'}
+function resetSession(){pauseSession();sessionPhase='idle';sessionSet=1;sessionRemaining=3;document.getElementById('sessionPhase').textContent='Bereit';document.getElementById('sessionDetail').textContent='Wähle eine Übung und tippe auf Start.';showSessionTime()}
+function startSession(){
+ if(sessionInterval)return;
+ const id=document.getElementById('sessionExercise').value;sessionExercise=exercises.find(x=>x.id===id);
+ if(!sessionExercise){alert('Bitte zuerst eine Übung speichern und auswählen.');return}
+ const seconds=Number(sessionExercise.time||0);if(!Number.isFinite(seconds)||seconds<=0){alert('Bitte bei dieser Übung zuerst eine Übungszeit in Sekunden speichern.');return}
+ if(sessionPhase==='idle'||sessionPhase==='done'){
+  sessionSet=1;sessionTotal=Math.max(1,Math.min(30,Number(document.getElementById('sessionSets').value)||1));
+  sessionPhase='prep';sessionRemaining=3;
+ }else if(sessionPhase==='paused'){sessionPhase=window.resumePhase||'prep'}
+ try{window.audioCtx=window.audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch(e){}
+ tickSession();
+ sessionInterval=setInterval(tickSession,1000);
+}
+function tickSession(){
+ const label=document.getElementById('sessionPhase'),detail=document.getElementById('sessionDetail');
+ if(sessionPhase==='prep'){
+  label.textContent='Bereit machen · Satz '+sessionSet+' von '+sessionTotal;
+  detail.textContent=sessionExercise.name+' startet gleich';
+  sessionRemaining--;showSessionTime();if(sessionRemaining<=0){sessionBeep(1100);sessionPhase='work';sessionRemaining=Number(sessionExercise.time);label.textContent='ÜBUNG';detail.textContent=sessionExercise.name+' · '+(sessionExercise.sets||'')+' Sätze · '+(sessionExercise.reps||'')+' Wiederholungen';}
+ }else if(sessionPhase==='work'){
+  label.textContent='ÜBUNG · Satz '+sessionSet+' von '+sessionTotal;showSessionTime();sessionRemaining--;
+  if(sessionRemaining<0){sessionBeep(660);if(sessionSet>=sessionTotal){clearInterval(sessionInterval);sessionInterval=null;sessionPhase='done';sessionRemaining=0;label.textContent='GESCHAFFT!';detail.textContent=sessionExercise.name+' abgeschlossen.';showSessionTime();return}
+   sessionPhase='rest';sessionRemaining=Math.max(0,Number(document.getElementById('restSeconds').value)||30);detail.textContent='Pause – danach startet der nächste Satz automatisch.';}
+ }else if(sessionPhase==='rest'){
+  label.textContent='PAUSE · Satz '+sessionSet+' abgeschlossen';showSessionTime();sessionRemaining--;
+  if(sessionRemaining<=3&&sessionRemaining>=0)sessionBeep(520);
+  if(sessionRemaining<0){sessionSet++;sessionPhase='prep';sessionRemaining=3;sessionBeep(880);}
+ }
+}
+
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}function updateTimer(){document.getElementById('timeDisplay').textContent=fmt(remaining)}
+function preset(s){pauseTimer();remaining=s;document.getElementById('minutes').value=Math.floor(s/60);document.getElementById('seconds').value=s%60;updateTimer()}
+function startTimer(){if(interval)return;if(remaining<=0)remaining=Math.max(0,Number(document.getElementById('minutes').value||0)*60+Number(document.getElementById('seconds').value||0));if(remaining<=0){alert('Bitte eine Zeit grösser als 0 einstellen.');return}try{window.audioCtx=window.audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch(e){}interval=setInterval(()=>{remaining--;updateTimer();if(remaining<=0){pauseTimer();alarm()}},1000)}
+function pauseTimer(){if(interval){clearInterval(interval);interval=null}}function resetTimer(){pauseTimer();remaining=Math.max(0,Number(document.getElementById('minutes').value||0)*60+Number(document.getElementById('seconds').value||0));updateTimer()}
+function alarm(){try{const ctx=window.audioCtx||new(window.AudioContext||window.webkitAudioContext)(),start=ctx.currentTime;[0,.35,.7].forEach(t=>{let o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.001,start+t);g.gain.exponentialRampToValueAtTime(.3,start+t+.02);g.gain.exponentialRampToValueAtTime(.001,start+t+.23);o.connect(g);g.connect(ctx.destination);o.start(start+t);o.stop(start+t+.25)})}catch(e){alert('Zeit abgelaufen!')}if(navigator.vibrate)navigator.vibrate([250,120,250])}
+function exportData(){const blob=new Blob([JSON.stringify({exercises,records},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='myfitness-backup.json';a.click();URL.revokeObjectURL(a.href)}
+updateTimer();render();
+</script>
+</body></html>
